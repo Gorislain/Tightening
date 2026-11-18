@@ -1,0 +1,689 @@
+﻿POLARS — СПРАВОЧНИК ФУНКЦИЙ И PYTHON-СКРИПТ
+Содержание:
+1. ТОП-146 функций Polars с описаниями и примерами
+2. Python-скрипт для генерации полного справочника API Polars
+Формат: UTF-8
+
+===========================================================================
+ЧАСТЬ 1. СПРАВОЧНИК POLARS
+===========================================================================
+
+# Polars: ТОП функций по темам
+
+**146 полезных функций и методов**, сгруппированных по задачам.
+
+Документация: https://docs.pola.rs/api/python/stable/reference/
+
+> Это справочник примеров: `df`, `lf`, `other` и т. д. — переменные вашего проекта. Некоторые функции зависят от версии Polars.
+
+## 01. Чтение и запись
+
+| Функция | Описание | Пример |
+|---|---|---|
+| `pl.read_csv` | Читает CSV-файл сразу в DataFrame. | `pl.read_csv("data.csv")` |
+| `pl.scan_csv` | Лениво читает CSV: данные загружаются при collect(). | `pl.scan_csv("data.csv").collect()` |
+| `pl.read_parquet` | Читает файл Parquet. | `pl.read_parquet("data.parquet")` |
+| `pl.scan_parquet` | Лениво читает Parquet с оптимизацией запроса. | `pl.scan_parquet("data.parquet").collect()` |
+| `pl.read_json` | Читает JSON-документ. | `pl.read_json("data.json")` |
+| `pl.read_ndjson` | Читает JSON Lines, одна запись в строке. | `pl.read_ndjson("data.ndjson")` |
+| `pl.scan_ndjson` | Лениво читает построчный JSON. | `pl.scan_ndjson("data.ndjson").collect()` |
+| `pl.read_excel` | Читает данные из Excel, может потребовать доп. пакет. | `pl.read_excel("data.xlsx")` |
+| `pl.read_database` | Выполняет SQL и читает таблицу из соединения БД. | `pl.read_database("SELECT * FROM t", connection)` |
+| `pl.read_database_uri` | Читает данные БД по URI с подходящим движком. | `pl.read_database_uri("SELECT * FROM t", uri)` |
+| `pl.DataFrame.write_csv` | Сохраняет DataFrame в CSV. | `df.write_csv("out.csv")` |
+| `pl.DataFrame.write_parquet` | Сохраняет DataFrame в Parquet. | `df.write_parquet("out.parquet")` |
+| `pl.DataFrame.write_json` | Сохраняет DataFrame в JSON. | `df.write_json("out.json")` |
+| `pl.DataFrame.write_ndjson` | Сохраняет DataFrame в JSON Lines. | `df.write_ndjson("out.ndjson")` |
+| `pl.DataFrame.write_excel` | Экспортирует данные в Excel (может потребовать xlsxwriter). | `df.write_excel("out.xlsx")` |
+
+## 02. Создание и объединение
+
+| Функция | Описание | Пример |
+|---|---|---|
+| `pl.DataFrame` | Создаёт табличный объект из словаря или записей. | `pl.DataFrame({"a": [1, 2], "b": [3, 4]})` |
+| `pl.Series` | Создаёт одномерную типизированную колонку. | `pl.Series("price", [100, 200])` |
+| `pl.LazyFrame` | Создаёт ленивый вычислительный план. | `pl.LazyFrame({"a": [1, 2]})` |
+| `pl.from_dicts` | Создаёт таблицу из списка словарей. | `pl.from_dicts([{"a": 1}, {"a": 2}])` |
+| `pl.from_pandas` | Преобразует pandas-объект в Polars (нужен pandas). | `pl.from_pandas(pdf)` |
+| `pl.from_arrow` | Преобразует Arrow-таблицу в Polars. | `pl.from_arrow(arrow_table)` |
+| `pl.concat` | Склеивает несколько таблиц/серий по заданному способу. | `pl.concat([df1, df2], how="vertical")` |
+| `pl.concat_str` | Соединяет строковые значения выражений. | `pl.concat_str(["first", "last"], separator=" ")` |
+| `pl.concat_list` | Собирает значения колонок в списки по строкам. | `pl.concat_list(["x", "y"])` |
+| `pl.col` | Создаёт выражение, ссылающееся на колонку. | `pl.col("price")` |
+| `pl.lit` | Создаёт выражение-константу. | `pl.lit(100)` |
+| `pl.when` | Начинает условное выражение when/then/otherwise. | `pl.when(pl.col("x") > 0).then(1).otherwise(0)` |
+| `pl.DataFrame.clone` | Создаёт дешёвую копию таблицы. | `df.clone()` |
+
+## 03. Колонки, строки, фильтрация
+
+| Функция | Описание | Пример |
+|---|---|---|
+| `pl.DataFrame.select` | Выбирает, преобразует и вычисляет колонки. | `df.select("name", pl.col("price") * 2)` |
+| `pl.DataFrame.with_columns` | Добавляет или заменяет вычисленные колонки. | `df.with_columns((pl.col("price") * 1.2).alias("gross"))` |
+| `pl.DataFrame.filter` | Оставляет строки по логическому условию. | `df.filter(pl.col("price") > 100)` |
+| `pl.DataFrame.sort` | Сортирует строки по одной/нескольким колонкам. | `df.sort("price", descending=True)` |
+| `pl.DataFrame.head` | Возвращает первые N строк. | `df.head(5)` |
+| `pl.DataFrame.tail` | Возвращает последние N строк. | `df.tail(5)` |
+| `pl.DataFrame.slice` | Берёт непрерывный диапазон строк. | `df.slice(10, 20)` |
+| `pl.DataFrame.sample` | Случайно выбирает строки. | `df.sample(n=5, seed=42)` |
+| `pl.DataFrame.drop` | Удаляет указанные колонки. | `df.drop("unneeded")` |
+| `pl.DataFrame.rename` | Переименовывает колонки. | `df.rename({"old": "new"})` |
+| `pl.DataFrame.unique` | Удаляет дубли строк по колонкам. | `df.unique(subset=["id"])` |
+| `pl.DataFrame.with_row_index` | Добавляет порядковый индекс строки. | `df.with_row_index("row_id")` |
+| `pl.DataFrame.unpivot` | Переводит широкую таблицу в длинный формат. | `df.unpivot(on=["jan", "feb"], index="id")` |
+| `pl.DataFrame.pivot` | Разворачивает категорию в колонки (eager). | `df.pivot(on="month", index="id", values="sales")` |
+| `pl.DataFrame.explode` | Разворачивает элементы списков в отдельные строки. | `df.explode("tags")` |
+| `pl.Expr.alias` | Задаёт имя результата выражения. | `pl.col("price").sum().alias("total")` |
+| `pl.Expr.cast` | Приводит значения к другому типу данных. | `pl.col("qty").cast(pl.Int64)` |
+| `pl.Expr.is_in` | Проверяет принадлежность набору значений. | `pl.col("country").is_in(["KZ", "US"])` |
+| `pl.Expr.is_between` | Проверяет попадание в интервал. | `pl.col("age").is_between(18, 65)` |
+| `pl.Expr.is_null` | Проверяет значения на null. | `pl.col("price").is_null()` |
+| `pl.Expr.is_not_null` | Проверяет, что значение не null. | `pl.col("price").is_not_null()` |
+| `pl.Expr.is_nan` | Проверяет NaN для чисел с плавающей точкой. | `pl.col("x").is_nan()` |
+| `pl.Expr.fill_null` | Заменяет отсутствующие значения null. | `pl.col("price").fill_null(0)` |
+| `pl.Expr.fill_nan` | Заменяет числовые значения NaN. | `pl.col("score").fill_nan(0)` |
+| `pl.Expr.forward_fill` | Заполняет null предыдущим известным значением. | `pl.col("x").forward_fill()` |
+| `pl.Expr.backward_fill` | Заполняет null следующим известным значением. | `pl.col("x").backward_fill()` |
+| `pl.coalesce` | Берёт первое не-null значение из выражений. | `pl.coalesce(["primary", "fallback"])` |
+
+## 04. Агрегации и статистика
+
+| Функция | Описание | Пример |
+|---|---|---|
+| `pl.DataFrame.group_by` | Группирует записи для агрегирования. | `df.group_by("category").agg(pl.col("price").mean())` |
+| `pl.Expr.sum` | Сумма значений колонки. | `pl.col("price").sum()` |
+| `pl.Expr.mean` | Среднее арифметическое. | `pl.col("price").mean()` |
+| `pl.Expr.median` | Медиана значений. | `pl.col("price").median()` |
+| `pl.Expr.min` | Минимальное значение. | `pl.col("price").min()` |
+| `pl.Expr.max` | Максимальное значение. | `pl.col("price").max()` |
+| `pl.Expr.std` | Стандартное отклонение. | `pl.col("price").std()` |
+| `pl.Expr.var` | Дисперсия. | `pl.col("price").var()` |
+| `pl.Expr.quantile` | Заданный квантиль распределения. | `pl.col("price").quantile(0.95)` |
+| `pl.Expr.n_unique` | Количество уникальных значений. | `pl.col("user_id").n_unique()` |
+| `pl.Expr.count` | Число не-null значений. | `pl.col("price").count()` |
+| `pl.len` | Число строк (включая строки с null). | `df.select(pl.len())` |
+| `pl.Expr.first` | Первое значение выражения. | `pl.col("price").first()` |
+| `pl.Expr.last` | Последнее значение выражения. | `pl.col("price").last()` |
+| `pl.Expr.value_counts` | Частоты отдельных значений. | `pl.col("category").value_counts()` |
+| `pl.Expr.rank` | Присваивает ранг каждому значению. | `pl.col("price").rank("dense")` |
+| `pl.corr` | Корреляция между колонками. | `pl.corr("a", "b")` |
+| `pl.cov` | Ковариация между колонками. | `pl.cov("a", "b")` |
+
+## 05. Соединения и работа с группами
+
+| Функция | Описание | Пример |
+|---|---|---|
+| `pl.DataFrame.join` | Объединяет таблицы по ключу (inner/left/full и др.). | `df.join(other, on="id", how="left")` |
+| `pl.DataFrame.join_asof` | Соединяет по ближайшему ключу, часто временно́му. | `left.join_asof(right, on="timestamp")` |
+| `pl.DataFrame.join_where` | Соединяет таблицы по произвольным условиям. | `left.join_where(right, pl.col("x") < pl.col("y_right"))` |
+| `pl.DataFrame.group_by_dynamic` | Группирует по скользящим календарным интервалам. | `df.group_by_dynamic("ts", every="1d").agg(pl.col("v").sum())` |
+| `pl.DataFrame.group_by_rolling` | Старое имя функции оконной группировки; наличие зависит от версии. | `df.group_by_rolling("ts", period="7d")` |
+| `pl.DataFrame.rolling` | Группирует по движущемуся временному окну. | `df.rolling(index_column="ts", period="7d").agg(pl.col("v").sum())` |
+| `pl.Expr.over` | Вычисляет оконное выражение по группе без схлопывания строк. | `pl.col("price").mean().over("category")` |
+| `pl.Expr.shift` | Сдвигает значения; полезно для лагов временных рядов. | `pl.col("value").shift(1)` |
+| `pl.Expr.diff` | Разница между текущим и предыдущим значением. | `pl.col("value").diff()` |
+| `pl.Expr.pct_change` | Относительное изменение значений. | `pl.col("value").pct_change()` |
+| `pl.Expr.cum_sum` | Накопительная сумма. | `pl.col("value").cum_sum()` |
+| `pl.Expr.cum_max` | Накопительный максимум. | `pl.col("value").cum_max()` |
+| `pl.Expr.rolling_mean` | Скользящее среднее за N строк. | `pl.col("value").rolling_mean(window_size=7)` |
+| `pl.Expr.rolling_std` | Скользящее стандартное отклонение. | `pl.col("value").rolling_std(window_size=7)` |
+| `pl.Expr.ewm_mean` | Экспоненциально взвешенное среднее. | `pl.col("value").ewm_mean(span=7)` |
+
+## 06. Строки
+
+| Функция | Описание | Пример |
+|---|---|---|
+| `pl.Expr.str.to_lowercase` | Преобразует текст к нижнему регистру. | `pl.col("text").str.to_lowercase()` |
+| `pl.Expr.str.to_uppercase` | Преобразует текст к верхнему регистру. | `pl.col("text").str.to_uppercase()` |
+| `pl.Expr.str.strip_chars` | Удаляет указанные символы по краям строки. | `pl.col("text").str.strip_chars()` |
+| `pl.Expr.str.contains` | Проверяет совпадение с подстрокой или regex. | `pl.col("text").str.contains("error")` |
+| `pl.Expr.str.starts_with` | Проверяет префикс строки. | `pl.col("text").str.starts_with("pre")` |
+| `pl.Expr.str.ends_with` | Проверяет суффикс строки. | `pl.col("text").str.ends_with(".csv")` |
+| `pl.Expr.str.replace` | Заменяет первое совпадение с шаблоном. | `pl.col("text").str.replace("old", "new")` |
+| `pl.Expr.str.replace_all` | Заменяет все совпадения с шаблоном. | `pl.col("text").str.replace_all("\s+", " ")` |
+| `pl.Expr.str.extract` | Извлекает группу регулярного выражения. | `pl.col("text").str.extract(r"(\d+)", 1)` |
+| `pl.Expr.str.split` | Разбивает строку по разделителю в список. | `pl.col("text").str.split(",")` |
+| `pl.Expr.str.len_chars` | Длина строки в символах Unicode. | `pl.col("text").str.len_chars()` |
+| `pl.Expr.str.len_bytes` | Длина строки в байтах UTF-8. | `pl.col("text").str.len_bytes()` |
+| `pl.Expr.str.strptime` | Разбирает текстовую дату/время по формату. | `pl.col("date").str.strptime(pl.Date, "%Y-%m-%d")` |
+
+## 07. Даты и время
+
+| Функция | Описание | Пример |
+|---|---|---|
+| `pl.date` | Создаёт выражение календарной даты. | `pl.date(2026, 11, 18)` |
+| `pl.datetime` | Создаёт выражение даты и времени. | `pl.datetime(2026, 11, 18, 12, 30)` |
+| `pl.date_range` | Создаёт диапазон календарных дат. | `pl.date_range(pl.date(2026,1,1), pl.date(2026,1,7), interval="1d")` |
+| `pl.datetime_range` | Создаёт диапазон временных меток. | `pl.datetime_range(start, end, interval="1h")` |
+| `pl.duration` | Создаёт временную длительность как выражение. | `pl.duration(days=7)` |
+| `pl.Expr.dt.year` | Извлекает год. | `pl.col("ts").dt.year()` |
+| `pl.Expr.dt.month` | Извлекает месяц. | `pl.col("ts").dt.month()` |
+| `pl.Expr.dt.day` | Извлекает день месяца. | `pl.col("ts").dt.day()` |
+| `pl.Expr.dt.weekday` | Извлекает номер дня недели. | `pl.col("ts").dt.weekday()` |
+| `pl.Expr.dt.hour` | Извлекает час. | `pl.col("ts").dt.hour()` |
+| `pl.Expr.dt.strftime` | Форматирует дату как строку. | `pl.col("ts").dt.strftime("%Y-%m-%d")` |
+| `pl.Expr.dt.truncate` | Округляет временные метки вниз к интервалу. | `pl.col("ts").dt.truncate("1h")` |
+| `pl.Expr.dt.offset_by` | Сдвигает дату на календарный интервал. | `pl.col("ts").dt.offset_by("1mo")` |
+| `pl.Expr.dt.replace_time_zone` | Устанавливает или заменяет часовой пояс. | `pl.col("ts").dt.replace_time_zone("Asia/Almaty")` |
+| `pl.Expr.dt.convert_time_zone` | Конвертирует время в другой часовой пояс. | `pl.col("ts").dt.convert_time_zone("UTC")` |
+
+## 08. Списки, массивы, структуры
+
+| Функция | Описание | Пример |
+|---|---|---|
+| `pl.Expr.list.len` | Количество элементов в списке каждой строки. | `pl.col("items").list.len()` |
+| `pl.Expr.list.get` | Извлекает элемент списка по индексу. | `pl.col("items").list.get(0, null_on_oob=True)` |
+| `pl.Expr.list.eval` | Вычисляет выражение для каждого элемента списка. | `pl.col("items").list.eval(pl.element() * 2)` |
+| `pl.Expr.list.sum` | Суммирует элементы списка в каждой строке. | `pl.col("items").list.sum()` |
+| `pl.Expr.list.contains` | Проверяет наличие элемента в списке. | `pl.col("items").list.contains("tag")` |
+| `pl.Expr.list.join` | Соединяет строковые элементы списка. | `pl.col("words").list.join(" ")` |
+| `pl.Expr.arr.sum` | Суммирует элементы массивов фиксированной длины. | `pl.col("array").arr.sum()` |
+| `pl.Expr.struct.field` | Извлекает поле структуры. | `pl.col("meta").struct.field("name")` |
+| `pl.struct` | Упаковывает несколько колонок в структурную колонку. | `pl.struct(["a", "b"])` |
+| `pl.element` | Ссылается на текущий элемент в контексте list.eval. | `pl.col("x").list.eval(pl.element() + 1)` |
+
+## 09. Lazy, SQL и оптимизация
+
+| Функция | Описание | Пример |
+|---|---|---|
+| `pl.DataFrame.lazy` | Превращает DataFrame в ленивый план запроса. | `df.lazy()` |
+| `pl.LazyFrame.collect` | Выполняет ленивый запрос и возвращает DataFrame. | `df.lazy().filter(pl.col("x") > 0).collect()` |
+| `pl.LazyFrame.sink_parquet` | Выполняет ленивый запрос с записью в Parquet. | `lf.sink_parquet("result.parquet")` |
+| `pl.LazyFrame.explain` | Показывает план выполнения и его оптимизацию. | `lf.explain(optimized=True)` |
+| `pl.LazyFrame.profile` | Выполняет запрос и возвращает замеры времени. | `lf.profile()` |
+| `pl.LazyFrame.fetch` | Исторический метод отладочного получения строк; может отсутствовать. | `lf.fetch(5)` |
+| `pl.SQLContext.execute` | Выполняет SQL в контексте зарегистрированных таблиц. | `pl.SQLContext(df=df).execute("SELECT * FROM df").collect()` |
+| `pl.sql` | Выполняет SQL-запрос к указанным объектам/контексту. | `pl.sql("SELECT 1 AS x", eager=True)` |
+| `pl.DataFrame.sql` | Выполняет SQL-запрос к DataFrame. | `df.sql("SELECT * FROM self")` |
+| `pl.Expr.map_elements` | Применяет Python-функцию поэлементно; обычно медленнее выражений. | `pl.col("x").map_elements(lambda x: x * 2, return_dtype=pl.Int64)` |
+
+## 10. Проверки и служебные
+
+| Функция | Описание | Пример |
+|---|---|---|
+| `pl.DataFrame.describe` | Возвращает базовую описательную статистику таблицы. | `df.describe()` |
+| `pl.DataFrame.schema` | Схема колонок (свойство, не функция). | `df.schema` |
+| `pl.DataFrame.null_count` | Считает null по всем колонкам. | `df.null_count()` |
+| `pl.DataFrame.is_empty` | Проверяет, нет ли строк. | `df.is_empty()` |
+| `pl.DataFrame.rows` | Возвращает строки как кортежи Python. | `df.rows()` |
+| `pl.DataFrame.to_dicts` | Преобразует строки в словари Python. | `df.to_dicts()` |
+| `pl.DataFrame.to_pandas` | Преобразует таблицу в pandas DataFrame. | `df.to_pandas()` |
+| `pl.DataFrame.estimated_size` | Оценивает объём памяти, занимаемой таблицей. | `df.estimated_size()` |
+| `pl.show_versions` | Показывает версии Polars и зависимостей. | `pl.show_versions()` |
+| `pl.thread_pool_size` | Количество потоков в пуле Polars. | `pl.thread_pool_size()` |
+
+
+===========================================================================
+ЧАСТЬ 2. PYTHON-СКРИПТ (сохранить отдельно как polars_reference_generator.py для запуска)
+===========================================================================
+
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""Генератор справочника функций Polars на русском языке.
+
+Назначение
+----------
+1. Создать ТОП полезных функций Polars с пояснениями и короткими примерами.
+2. Найти ВСЕ доступные публичные функции/методы установленной версии Polars:
+   pl.*, DataFrame, LazyFrame, Series, Expr, их пространства имён,
+   GroupBy, LazyGroupBy, selectors и SQLContext (если доступны).
+3. Сохранить результаты в Markdown и CSV, чтобы читать их на GitHub и ПК.
+
+Установка: python -m pip install -U polars
+Примеры:
+    python polars_reference_generator.py
+    python polars_reference_generator.py --output docs/polars_api.md
+    python polars_reference_generator.py --top 50
+    python polars_reference_generator.py --search join
+    python polars_reference_generator.py --only-top
+    python polars_reference_generator.py --demo
+
+Примечание: описания ТОП-функций написаны на русском. Для остальных
+функций используется первая строка официального docstring установленного
+Polars (чаще на английском), поскольку автоматически достоверно перевести
+сотни технических терминов без службы перевода невозможно.
+"""
+
+from __future__ import annotations
+
+import argparse
+import csv
+from datetime import datetime, timezone
+import inspect
+from pathlib import Path
+import re
+import sys
+from typing import Any, Iterator
+
+try:
+    import polars as pl
+except ImportError:
+    print(
+        "Не найден polars. Установите его: python -m pip install -U polars",
+        file=sys.stderr,
+    )
+    raise SystemExit(2)
+
+# Синтаксис примеров предполагает: import polars as pl; df — Polars DataFrame.
+# Каждая запись: (квалифицированное имя, русское описание, краткий пример).
+TOPICS: dict[str, list[tuple[str, str, str]]] = {
+    "01. Чтение и запись": [
+        ("pl.read_csv", "Читает CSV-файл сразу в DataFrame.", 'pl.read_csv("data.csv")'),
+        ("pl.scan_csv", "Лениво читает CSV: данные загружаются при collect().", 'pl.scan_csv("data.csv").collect()'),
+        ("pl.read_parquet", "Читает файл Parquet.", 'pl.read_parquet("data.parquet")'),
+        ("pl.scan_parquet", "Лениво читает Parquet с оптимизацией запроса.", 'pl.scan_parquet("data.parquet").collect()'),
+        ("pl.read_json", "Читает JSON-документ.", 'pl.read_json("data.json")'),
+        ("pl.read_ndjson", "Читает JSON Lines, одна запись в строке.", 'pl.read_ndjson("data.ndjson")'),
+        ("pl.scan_ndjson", "Лениво читает построчный JSON.", 'pl.scan_ndjson("data.ndjson").collect()'),
+        ("pl.read_excel", "Читает данные из Excel, может потребовать доп. пакет.", 'pl.read_excel("data.xlsx")'),
+        ("pl.read_database", "Выполняет SQL и читает таблицу из соединения БД.", 'pl.read_database("SELECT * FROM t", connection)'),
+        ("pl.read_database_uri", "Читает данные БД по URI с подходящим движком.", 'pl.read_database_uri("SELECT * FROM t", uri)'),
+        ("pl.DataFrame.write_csv", "Сохраняет DataFrame в CSV.", 'df.write_csv("out.csv")'),
+        ("pl.DataFrame.write_parquet", "Сохраняет DataFrame в Parquet.", 'df.write_parquet("out.parquet")'),
+        ("pl.DataFrame.write_json", "Сохраняет DataFrame в JSON.", 'df.write_json("out.json")'),
+        ("pl.DataFrame.write_ndjson", "Сохраняет DataFrame в JSON Lines.", 'df.write_ndjson("out.ndjson")'),
+        ("pl.DataFrame.write_excel", "Экспортирует данные в Excel (может потребовать xlsxwriter).", 'df.write_excel("out.xlsx")'),
+    ],
+    "02. Создание и объединение": [
+        ("pl.DataFrame", "Создаёт табличный объект из словаря или записей.", 'pl.DataFrame({"a": [1, 2], "b": [3, 4]})'),
+        ("pl.Series", "Создаёт одномерную типизированную колонку.", 'pl.Series("price", [100, 200])'),
+        ("pl.LazyFrame", "Создаёт ленивый вычислительный план.", 'pl.LazyFrame({"a": [1, 2]})'),
+        ("pl.from_dicts", "Создаёт таблицу из списка словарей.", 'pl.from_dicts([{"a": 1}, {"a": 2}])'),
+        ("pl.from_pandas", "Преобразует pandas-объект в Polars (нужен pandas).", 'pl.from_pandas(pdf)'),
+        ("pl.from_arrow", "Преобразует Arrow-таблицу в Polars.", 'pl.from_arrow(arrow_table)'),
+        ("pl.concat", "Склеивает несколько таблиц/серий по заданному способу.", 'pl.concat([df1, df2], how="vertical")'),
+        ("pl.concat_str", "Соединяет строковые значения выражений.", 'pl.concat_str(["first", "last"], separator=" ")'),
+        ("pl.concat_list", "Собирает значения колонок в списки по строкам.", 'pl.concat_list(["x", "y"])'),
+        ("pl.col", "Создаёт выражение, ссылающееся на колонку.", 'pl.col("price")'),
+        ("pl.lit", "Создаёт выражение-константу.", 'pl.lit(100)'),
+        ("pl.when", "Начинает условное выражение when/then/otherwise.", 'pl.when(pl.col("x") > 0).then(1).otherwise(0)'),
+        ("pl.DataFrame.clone", "Создаёт дешёвую копию таблицы.", 'df.clone()'),
+    ],
+    "03. Колонки, строки, фильтрация": [
+        ("pl.DataFrame.select", "Выбирает, преобразует и вычисляет колонки.", 'df.select("name", pl.col("price") * 2)'),
+        ("pl.DataFrame.with_columns", "Добавляет или заменяет вычисленные колонки.", 'df.with_columns((pl.col("price") * 1.2).alias("gross"))'),
+        ("pl.DataFrame.filter", "Оставляет строки по логическому условию.", 'df.filter(pl.col("price") > 100)'),
+        ("pl.DataFrame.sort", "Сортирует строки по одной/нескольким колонкам.", 'df.sort("price", descending=True)'),
+        ("pl.DataFrame.head", "Возвращает первые N строк.", 'df.head(5)'),
+        ("pl.DataFrame.tail", "Возвращает последние N строк.", 'df.tail(5)'),
+        ("pl.DataFrame.slice", "Берёт непрерывный диапазон строк.", 'df.slice(10, 20)'),
+        ("pl.DataFrame.sample", "Случайно выбирает строки.", 'df.sample(n=5, seed=42)'),
+        ("pl.DataFrame.drop", "Удаляет указанные колонки.", 'df.drop("unneeded")'),
+        ("pl.DataFrame.rename", "Переименовывает колонки.", 'df.rename({"old": "new"})'),
+        ("pl.DataFrame.unique", "Удаляет дубли строк по колонкам.", 'df.unique(subset=["id"])'),
+        ("pl.DataFrame.with_row_index", "Добавляет порядковый индекс строки.", 'df.with_row_index("row_id")'),
+        ("pl.DataFrame.unpivot", "Переводит широкую таблицу в длинный формат.", 'df.unpivot(on=["jan", "feb"], index="id")'),
+        ("pl.DataFrame.pivot", "Разворачивает категорию в колонки (eager).", 'df.pivot(on="month", index="id", values="sales")'),
+        ("pl.DataFrame.explode", "Разворачивает элементы списков в отдельные строки.", 'df.explode("tags")'),
+        ("pl.Expr.alias", "Задаёт имя результата выражения.", 'pl.col("price").sum().alias("total")'),
+        ("pl.Expr.cast", "Приводит значения к другому типу данных.", 'pl.col("qty").cast(pl.Int64)'),
+        ("pl.Expr.is_in", "Проверяет принадлежность набору значений.", 'pl.col("country").is_in(["KZ", "US"])'),
+        ("pl.Expr.is_between", "Проверяет попадание в интервал.", 'pl.col("age").is_between(18, 65)'),
+        ("pl.Expr.is_null", "Проверяет значения на null.", 'pl.col("price").is_null()'),
+        ("pl.Expr.is_not_null", "Проверяет, что значение не null.", 'pl.col("price").is_not_null()'),
+        ("pl.Expr.is_nan", "Проверяет NaN для чисел с плавающей точкой.", 'pl.col("x").is_nan()'),
+        ("pl.Expr.fill_null", "Заменяет отсутствующие значения null.", 'pl.col("price").fill_null(0)'),
+        ("pl.Expr.fill_nan", "Заменяет числовые значения NaN.", 'pl.col("score").fill_nan(0)'),
+        ("pl.Expr.forward_fill", "Заполняет null предыдущим известным значением.", 'pl.col("x").forward_fill()'),
+        ("pl.Expr.backward_fill", "Заполняет null следующим известным значением.", 'pl.col("x").backward_fill()'),
+        ("pl.coalesce", "Берёт первое не-null значение из выражений.", 'pl.coalesce(["primary", "fallback"])'),
+    ],
+    "04. Агрегации и статистика": [
+        ("pl.DataFrame.group_by", "Группирует записи для агрегирования.", 'df.group_by("category").agg(pl.col("price").mean())'),
+        ("pl.Expr.sum", "Сумма значений колонки.", 'pl.col("price").sum()'),
+        ("pl.Expr.mean", "Среднее арифметическое.", 'pl.col("price").mean()'),
+        ("pl.Expr.median", "Медиана значений.", 'pl.col("price").median()'),
+        ("pl.Expr.min", "Минимальное значение.", 'pl.col("price").min()'),
+        ("pl.Expr.max", "Максимальное значение.", 'pl.col("price").max()'),
+        ("pl.Expr.std", "Стандартное отклонение.", 'pl.col("price").std()'),
+        ("pl.Expr.var", "Дисперсия.", 'pl.col("price").var()'),
+        ("pl.Expr.quantile", "Заданный квантиль распределения.", 'pl.col("price").quantile(0.95)'),
+        ("pl.Expr.n_unique", "Количество уникальных значений.", 'pl.col("user_id").n_unique()'),
+        ("pl.Expr.count", "Число не-null значений.", 'pl.col("price").count()'),
+        ("pl.len", "Число строк (включая строки с null).", 'df.select(pl.len())'),
+        ("pl.Expr.first", "Первое значение выражения.", 'pl.col("price").first()'),
+        ("pl.Expr.last", "Последнее значение выражения.", 'pl.col("price").last()'),
+        ("pl.Expr.value_counts", "Частоты отдельных значений.", 'pl.col("category").value_counts()'),
+        ("pl.Expr.rank", "Присваивает ранг каждому значению.", 'pl.col("price").rank("dense")'),
+        ("pl.corr", "Корреляция между колонками.", 'pl.corr("a", "b")'),
+        ("pl.cov", "Ковариация между колонками.", 'pl.cov("a", "b")'),
+    ],
+    "05. Соединения и работа с группами": [
+        ("pl.DataFrame.join", "Объединяет таблицы по ключу (inner/left/full и др.).", 'df.join(other, on="id", how="left")'),
+        ("pl.DataFrame.join_asof", "Соединяет по ближайшему ключу, часто временно́му.", 'left.join_asof(right, on="timestamp")'),
+        ("pl.DataFrame.join_where", "Соединяет таблицы по произвольным условиям.", 'left.join_where(right, pl.col("x") < pl.col("y_right"))'),
+        ("pl.DataFrame.group_by_dynamic", "Группирует по скользящим календарным интервалам.", 'df.group_by_dynamic("ts", every="1d").agg(pl.col("v").sum())'),
+        ("pl.DataFrame.group_by_rolling", "Старое имя функции оконной группировки; наличие зависит от версии.", 'df.group_by_rolling("ts", period="7d")'),
+        ("pl.DataFrame.rolling", "Группирует по движущемуся временному окну.", 'df.rolling(index_column="ts", period="7d").agg(pl.col("v").sum())'),
+        ("pl.Expr.over", "Вычисляет оконное выражение по группе без схлопывания строк.", 'pl.col("price").mean().over("category")'),
+        ("pl.Expr.shift", "Сдвигает значения; полезно для лагов временных рядов.", 'pl.col("value").shift(1)'),
+        ("pl.Expr.diff", "Разница между текущим и предыдущим значением.", 'pl.col("value").diff()'),
+        ("pl.Expr.pct_change", "Относительное изменение значений.", 'pl.col("value").pct_change()'),
+        ("pl.Expr.cum_sum", "Накопительная сумма.", 'pl.col("value").cum_sum()'),
+        ("pl.Expr.cum_max", "Накопительный максимум.", 'pl.col("value").cum_max()'),
+        ("pl.Expr.rolling_mean", "Скользящее среднее за N строк.", 'pl.col("value").rolling_mean(window_size=7)'),
+        ("pl.Expr.rolling_std", "Скользящее стандартное отклонение.", 'pl.col("value").rolling_std(window_size=7)'),
+        ("pl.Expr.ewm_mean", "Экспоненциально взвешенное среднее.", 'pl.col("value").ewm_mean(span=7)'),
+    ],
+    "06. Строки": [
+        ("pl.Expr.str.to_lowercase", "Преобразует текст к нижнему регистру.", 'pl.col("text").str.to_lowercase()'),
+        ("pl.Expr.str.to_uppercase", "Преобразует текст к верхнему регистру.", 'pl.col("text").str.to_uppercase()'),
+        ("pl.Expr.str.strip_chars", "Удаляет указанные символы по краям строки.", 'pl.col("text").str.strip_chars()'),
+        ("pl.Expr.str.contains", "Проверяет совпадение с подстрокой или regex.", 'pl.col("text").str.contains("error")'),
+        ("pl.Expr.str.starts_with", "Проверяет префикс строки.", 'pl.col("text").str.starts_with("pre")'),
+        ("pl.Expr.str.ends_with", "Проверяет суффикс строки.", 'pl.col("text").str.ends_with(".csv")'),
+        ("pl.Expr.str.replace", "Заменяет первое совпадение с шаблоном.", 'pl.col("text").str.replace("old", "new")'),
+        ("pl.Expr.str.replace_all", "Заменяет все совпадения с шаблоном.", 'pl.col("text").str.replace_all("\\s+", " ")'),
+        ("pl.Expr.str.extract", "Извлекает группу регулярного выражения.", 'pl.col("text").str.extract(r"(\\d+)", 1)'),
+        ("pl.Expr.str.split", "Разбивает строку по разделителю в список.", 'pl.col("text").str.split(",")'),
+        ("pl.Expr.str.len_chars", "Длина строки в символах Unicode.", 'pl.col("text").str.len_chars()'),
+        ("pl.Expr.str.len_bytes", "Длина строки в байтах UTF-8.", 'pl.col("text").str.len_bytes()'),
+        ("pl.Expr.str.strptime", "Разбирает текстовую дату/время по формату.", 'pl.col("date").str.strptime(pl.Date, "%Y-%m-%d")'),
+    ],
+    "07. Даты и время": [
+        ("pl.date", "Создаёт выражение календарной даты.", 'pl.date(2026, 11, 18)'),
+        ("pl.datetime", "Создаёт выражение даты и времени.", 'pl.datetime(2026, 11, 18, 12, 30)'),
+        ("pl.date_range", "Создаёт диапазон календарных дат.", 'pl.date_range(pl.date(2026,1,1), pl.date(2026,1,7), interval="1d")'),
+        ("pl.datetime_range", "Создаёт диапазон временных меток.", 'pl.datetime_range(start, end, interval="1h")'),
+        ("pl.duration", "Создаёт временную длительность как выражение.", 'pl.duration(days=7)'),
+        ("pl.Expr.dt.year", "Извлекает год.", 'pl.col("ts").dt.year()'),
+        ("pl.Expr.dt.month", "Извлекает месяц.", 'pl.col("ts").dt.month()'),
+        ("pl.Expr.dt.day", "Извлекает день месяца.", 'pl.col("ts").dt.day()'),
+        ("pl.Expr.dt.weekday", "Извлекает номер дня недели.", 'pl.col("ts").dt.weekday()'),
+        ("pl.Expr.dt.hour", "Извлекает час.", 'pl.col("ts").dt.hour()'),
+        ("pl.Expr.dt.strftime", "Форматирует дату как строку.", 'pl.col("ts").dt.strftime("%Y-%m-%d")'),
+        ("pl.Expr.dt.truncate", "Округляет временные метки вниз к интервалу.", 'pl.col("ts").dt.truncate("1h")'),
+        ("pl.Expr.dt.offset_by", "Сдвигает дату на календарный интервал.", 'pl.col("ts").dt.offset_by("1mo")'),
+        ("pl.Expr.dt.replace_time_zone", "Устанавливает или заменяет часовой пояс.", 'pl.col("ts").dt.replace_time_zone("Asia/Almaty")'),
+        ("pl.Expr.dt.convert_time_zone", "Конвертирует время в другой часовой пояс.", 'pl.col("ts").dt.convert_time_zone("UTC")'),
+    ],
+    "08. Списки, массивы, структуры": [
+        ("pl.Expr.list.len", "Количество элементов в списке каждой строки.", 'pl.col("items").list.len()'),
+        ("pl.Expr.list.get", "Извлекает элемент списка по индексу.", 'pl.col("items").list.get(0, null_on_oob=True)'),
+        ("pl.Expr.list.eval", "Вычисляет выражение для каждого элемента списка.", 'pl.col("items").list.eval(pl.element() * 2)'),
+        ("pl.Expr.list.sum", "Суммирует элементы списка в каждой строке.", 'pl.col("items").list.sum()'),
+        ("pl.Expr.list.contains", "Проверяет наличие элемента в списке.", 'pl.col("items").list.contains("tag")'),
+        ("pl.Expr.list.join", "Соединяет строковые элементы списка.", 'pl.col("words").list.join(" ")'),
+        ("pl.Expr.arr.sum", "Суммирует элементы массивов фиксированной длины.", 'pl.col("array").arr.sum()'),
+        ("pl.Expr.struct.field", "Извлекает поле структуры.", 'pl.col("meta").struct.field("name")'),
+        ("pl.struct", "Упаковывает несколько колонок в структурную колонку.", 'pl.struct(["a", "b"])'),
+        ("pl.element", "Ссылается на текущий элемент в контексте list.eval.", 'pl.col("x").list.eval(pl.element() + 1)'),
+    ],
+    "09. Lazy, SQL и оптимизация": [
+        ("pl.DataFrame.lazy", "Превращает DataFrame в ленивый план запроса.", 'df.lazy()'),
+        ("pl.LazyFrame.collect", "Выполняет ленивый запрос и возвращает DataFrame.", 'df.lazy().filter(pl.col("x") > 0).collect()'),
+        ("pl.LazyFrame.sink_parquet", "Выполняет ленивый запрос с записью в Parquet.", 'lf.sink_parquet("result.parquet")'),
+        ("pl.LazyFrame.explain", "Показывает план выполнения и его оптимизацию.", 'lf.explain(optimized=True)'),
+        ("pl.LazyFrame.profile", "Выполняет запрос и возвращает замеры времени.", 'lf.profile()'),
+        ("pl.LazyFrame.fetch", "Исторический метод отладочного получения строк; может отсутствовать.", 'lf.fetch(5)'),
+        ("pl.SQLContext.execute", "Выполняет SQL в контексте зарегистрированных таблиц.", 'pl.SQLContext(df=df).execute("SELECT * FROM df").collect()'),
+        ("pl.sql", "Выполняет SQL-запрос к указанным объектам/контексту.", 'pl.sql("SELECT 1 AS x", eager=True)'),
+        ("pl.DataFrame.sql", "Выполняет SQL-запрос к DataFrame.", 'df.sql("SELECT * FROM self")'),
+        ("pl.Expr.map_elements", "Применяет Python-функцию поэлементно; обычно медленнее выражений.", 'pl.col("x").map_elements(lambda x: x * 2, return_dtype=pl.Int64)'),
+    ],
+    "10. Проверки и служебные": [
+        ("pl.DataFrame.describe", "Возвращает базовую описательную статистику таблицы.", 'df.describe()'),
+        ("pl.DataFrame.schema", "Схема колонок (свойство, не функция).", 'df.schema'),
+        ("pl.DataFrame.null_count", "Считает null по всем колонкам.", 'df.null_count()'),
+        ("pl.DataFrame.is_empty", "Проверяет, нет ли строк.", 'df.is_empty()'),
+        ("pl.DataFrame.rows", "Возвращает строки как кортежи Python.", 'df.rows()'),
+        ("pl.DataFrame.to_dicts", "Преобразует строки в словари Python.", 'df.to_dicts()'),
+        ("pl.DataFrame.to_pandas", "Преобразует таблицу в pandas DataFrame.", 'df.to_pandas()'),
+        ("pl.DataFrame.estimated_size", "Оценивает объём памяти, занимаемой таблицей.", 'df.estimated_size()'),
+        ("pl.show_versions", "Показывает версии Polars и зависимостей.", 'pl.show_versions()'),
+        ("pl.thread_pool_size", "Количество потоков в пуле Polars.", 'pl.thread_pool_size()'),
+    ],
+}
+
+
+def plain_doc(obj: Any) -> str:
+    """Первая информативная строка docstring с ограничением длины."""
+    try:
+        source = inspect.getdoc(obj) or ""
+    except (ValueError, TypeError, AttributeError):
+        source = ""
+    for line in source.splitlines():
+        candidate = line.strip()
+        if not candidate or candidate.startswith(("..", ">>>", "Parameters", "Notes")):
+            continue
+        candidate = re.sub(r"\s+", " ", candidate)
+        return candidate[:260].rstrip()
+    return "Документация не предоставлена в установленной версии Polars."
+
+
+def members(obj: Any) -> Iterator[tuple[str, Any]]:
+    """Публичные вызываемые атрибуты без выполнения самих функций."""
+    try:
+        names = dir(obj)
+    except Exception:
+        return
+    for name in names:
+        if name.startswith("_"):
+            continue
+        try:
+            item = getattr(obj, name)
+        except Exception:
+            continue
+        if callable(item):
+            yield name, item
+
+
+def available_targets() -> Iterator[tuple[str, str, Any]]:
+    """Объекты API, которые можно перечислить без чтения документации из сети."""
+    yield ("Функции верхнего уровня", "pl", pl)
+    for cls_name in ("DataFrame", "LazyFrame", "Series", "Expr"):
+        cls = getattr(pl, cls_name, None)
+        if cls is not None:
+            yield (f"Методы {cls_name}", f"pl.{cls_name}", cls)
+
+    # Пространства имён .str, .dt, .list, .arr, .struct и др.
+    try:
+        expr = pl.col("_column")
+    except Exception:
+        expr = None
+    series = None
+    try:
+        series = pl.Series("_column", [1])
+    except Exception:
+        pass
+    for type_name, base in (("Expr", expr), ("Series", series)):
+        if base is None:
+            continue
+        for namespace in ("str", "dt", "list", "arr", "struct", "bin", "cat", "name", "meta"):
+            try:
+                accessor = getattr(base, namespace)
+            except Exception:
+                continue
+            yield (
+                f"{type_name}: пространство имён .{namespace}",
+                f"pl.{type_name}.{namespace}",
+                accessor,
+            )
+
+    try:
+        import polars.selectors as cs
+        yield ("Селекторы колонок", "pl.selectors", cs)
+    except ImportError:
+        pass
+
+    try:
+        group_by = pl.DataFrame({"_key": [1], "_v": [2]}).group_by("_key")
+        yield ("Методы GroupBy", "pl.GroupBy", group_by)
+    except Exception:
+        pass
+    try:
+        lazy_group_by = pl.DataFrame({"_key": [1]}).lazy().group_by("_key")
+        yield ("Методы LazyGroupBy", "pl.LazyGroupBy", lazy_group_by)
+    except Exception:
+        pass
+    try:
+        sql_context = pl.SQLContext()
+        yield ("Методы SQLContext", "pl.SQLContext", sql_context)
+    except Exception:
+        pass
+
+
+def create_catalog() -> dict[str, list[tuple[str, Any]]]:
+    groups: dict[str, list[tuple[str, Any]]] = {}
+    visited: set[str] = set()
+    for group, prefix, target in available_targets():
+        items: list[tuple[str, Any]] = []
+        for name, item in members(target):
+            full_name = f"{prefix}.{name}"
+            if full_name in visited:
+                continue
+            if prefix == "pl" and isinstance(item, type):
+                # Классы отдельно представлены в ТОПе, здесь — только функции.
+                continue
+            visited.add(full_name)
+            items.append((full_name, item))
+        if items:
+            groups[group] = sorted(items, key=lambda pair: pair[0].casefold())
+    return groups
+
+
+def escape_table(value: str) -> str:
+    return value.replace("|", r"\|").replace("\n", " ").replace("`", "'")
+
+
+def filter_text(term: str, *parts: str) -> bool:
+    return not term or term.casefold() in " ".join(parts).casefold()
+
+
+def produce(top_limit: int, search: str, include_full: bool) -> tuple[str, list[tuple[str, str, str, str]]]:
+    catalogue = create_catalog() if include_full else {}
+    existing = {name for names in catalogue.values() for name, _ in names}
+    by_name = {name: item for names in catalogue.values() for name, item in names}
+    top_lookup = {name: (desc, example) for rows in TOPICS.values() for name, desc, example in rows}
+    date = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
+    markdown = [
+        "# Polars: ТОП-функции и полный справочник Python API",
+        "",
+        f"**Установленная версия Polars:** `{pl.__version__}`  ",
+        f"**Сгенерировано:** {date}  ",
+        "**Документация:** https://docs.pola.rs/api/python/stable/reference/",
+        "",
+        "Функции сгруппированы по задачам. ТОП снабжён русскими пояснениями и мини-примерами. ",
+        "Полный каталог определяется автоматически по установленному Polars и содержит ",
+        "описания из docstring библиотеки, если русского пояснения нет.",
+        "",
+        "> Примеры — краткие шаблоны: переменные `df`, `other`, `lf`, `start`, `end` и `connection` ",
+        "> требуется создать самостоятельно. Методы, отсутствующие в вашей версии, ",
+        "> отмечены как недоступные только при генерации полного каталога.",
+        "",
+    ]
+    rows_for_csv: list[tuple[str, str, str, str]] = []
+    count_top = 0
+    markdown += ["## Часть I. ТОП самых полезных функций по темам", ""]
+    for topic, records in TOPICS.items():
+        filtered = []
+        for name, ru, example in records:
+            if not filter_text(search, name, ru, example, topic):
+                continue
+            if count_top >= top_limit:
+                break
+            filtered.append((name, ru, example))
+            count_top += 1
+        if not filtered:
+            continue
+        markdown += [f"### {topic}", "", "| Функция | Описание | Пример |", "|---|---|---|"]
+        for name, ru, example in filtered:
+            suffix = ""
+            if include_full and name not in existing and name not in ("pl.DataFrame", "pl.Series", "pl.LazyFrame", "pl.DataFrame.schema"):
+                suffix = " ⚠️ *нет в версии*"
+            markdown.append(
+                f"| `{escape_table(name)}`{suffix} | {escape_table(ru)} | `{escape_table(example)}` |"
+            )
+            rows_for_csv.append(("ТОП / " + topic, name, ru, example))
+        markdown.append("")
+    markdown += [f"Всего в ТОПе: **{count_top}** функций и свойств.", ""]
+
+    if include_full:
+        markdown += ["## Часть II. Все обнаруженные публичные функции и методы", ""]
+        all_count = 0
+        for group, entries in catalogue.items():
+            filtered = []
+            for name, obj in entries:
+                desc = top_lookup.get(name, (None, None))[0] or plain_doc(obj)
+                if filter_text(search, name, desc, group):
+                    filtered.append((name, obj, desc))
+            if not filtered:
+                continue
+            markdown += [f"### {group}", "", "| Функция / метод | Описание |", "|---|---|"]
+            for name, _, desc in filtered:
+                markdown.append(f"| `{escape_table(name)}` | {escape_table(desc)} |")
+                rows_for_csv.append((group, name, desc, ""))
+                all_count += 1
+            markdown.append("")
+        markdown += [f"**Всего найдено методов и функций:** {all_count}.", ""]
+        markdown += [
+            "Для детальной сигнатуры, параметров и примеров используйте официальную ",
+            "документацию или в Python: `help(pl.Expr.rolling_mean)`.",
+            "",
+        ]
+    return "\n".join(markdown), rows_for_csv
+
+
+def run_demo() -> None:
+    """Небольшой выполняемый пример с популярными выражениями Polars."""
+    df = pl.DataFrame(
+        {
+            "category": ["GPU", "CPU", "GPU", "SSD", "CPU"],
+            "price": [200_000, 150_000, 260_000, 40_000, None],
+            "qty": [2, 1, 1, 3, 5],
+        }
+    )
+    print("\n=== Оригинальная таблица ===")
+    print(df)
+    print("\n=== ТОП-операции: filter, with_columns, group_by, agg, sort ===")
+    print(
+        df.lazy()
+        .with_columns(pl.col("price").fill_null(0).alias("price"))
+        .filter(pl.col("qty") >= 1)
+        .with_columns((pl.col("price") * pl.col("qty")).alias("revenue"))
+        .group_by("category")
+        .agg(
+            pl.len().alias("rows"),
+            pl.col("revenue").sum().alias("revenue_sum"),
+            pl.col("price").mean().round(2).alias("avg_price"),
+        )
+        .sort("revenue_sum", descending=True)
+        .collect()
+    )
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser(description="ТОП и полный справочник функций Polars")
+    parser.add_argument("--output", default="polars_functions.md", help="Куда записать Markdown")
+    parser.add_argument("--top", type=int, default=250, help="Максимум функций в ТОПе")
+    parser.add_argument("--search", default="", help="Поиск имени/описания")
+    parser.add_argument("--only-top", action="store_true", help="Не собирать полный API")
+    parser.add_argument("--demo", action="store_true", help="Выполнить учебный пример")
+    args = parser.parse_args()
+
+    if args.top < 0:
+        parser.error("--top должен быть неотрицательным")
+    if args.demo:
+        run_demo()
+
+    doc, csv_rows = produce(args.top, args.search.strip(), not args.only_top)
+    md_path = Path(args.output).expanduser()
+    md_path.parent.mkdir(parents=True, exist_ok=True)
+    md_path.write_text(doc, encoding="utf-8")
+    csv_path = md_path.with_suffix(".csv")
+    with csv_path.open("w", encoding="utf-8-sig", newline="") as out:
+        writer = csv.writer(out, delimiter=";")
+        writer.writerow(["Раздел", "Функция", "Описание", "Пример"])
+        writer.writerows(csv_rows)
+
+    print(f"Версия Polars: {pl.__version__}")
+    print(f"Записано: {md_path.resolve()}")
+    print(f"Записано: {csv_path.resolve()}")
+    print(f"Строк каталога и ТОПа: {len(csv_rows)}")
+    if args.search:
+        print(f"Поисковый запрос: {args.search!r}")
+
+
+if __name__ == "__main__":
+    main()
+
